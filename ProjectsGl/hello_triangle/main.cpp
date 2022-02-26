@@ -51,6 +51,7 @@ int main()
 
     unsigned int VBO;
     glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
     // render loop
     // -----------
