@@ -1,7 +1,10 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include <shader/Shader.h>
+#include <shader/shader.h>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <../stb_image.h>
 
 #include <iostream>
 
@@ -48,11 +51,67 @@ int main()
 	Shader ourShader("vshader.vs", "fshader.fs");
 
 	float vertices[] = {
-		// position         // color
-		 0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,   // lower right
-		-0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   // lower left
-		 0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f    // top
+		// positions          // colors           // texture coords
+		 0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
+		 0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
+		-0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+		-0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left 
 	};
+
+	unsigned int indices[] = { // index starts from 0
+		0, 1, 3, // first tirangle
+		1, 2, 3  // second triangle
+	};
+
+	unsigned int texture1, texture2;
+	// texture 1
+	// ---------
+	glGenTextures(1, &texture1);
+	glBindTexture(GL_TEXTURE_2D, texture1);
+	// set the texture wrapping/filtering options (on the currently bound texture object)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// load and generate the texture
+	int width, height, nrChannels;
+	stbi_set_flip_vertically_on_load(true);
+	unsigned char* data = stbi_load("container.jpg", &width, &height, &nrChannels, 0);
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "Failed to load texture" << std::endl;
+	}
+	stbi_image_free(data);
+	// texture 2
+	// ---------
+	glGenTextures(1, &texture2);
+	glBindTexture(GL_TEXTURE_2D, texture2);
+	// set the texture wrapping/filtering options (on the currently bound texture object)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// load and generate the texture
+	data = stbi_load("awesomeface.png", &width, &height, &nrChannels, 0);
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "Failed to load texture" << std::endl;
+	}
+	stbi_image_free(data);
+
+	ourShader.use();
+	glUniform1i(glGetUniformLocation(ourShader.ID, "texture1"), 0); // set it manually
+	ourShader.setInt("texture2", 1); // or with shader class
 
 	// VBO, EBO, VAO
 	unsigned int VBO, EBO, VAO;
@@ -64,16 +123,17 @@ int main()
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-	/*glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);*/
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GL_FLOAT), (GLvoid*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GL_FLOAT), (void*)0);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GL_FLOAT), (GLvoid*)(3 * sizeof(GL_FLOAT)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GL_FLOAT), (void*)(3 * sizeof(GL_FLOAT)));
 	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GL_FLOAT), (void*)(6 * sizeof(GL_FLOAT)));
+	glEnableVertexAttribArray(2);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
 	glBindVertexArray(0);
 
 	// render loop
@@ -89,22 +149,21 @@ int main()
 		glClearColor(0.91f, 0.71f, 0.28f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
+		glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
+		glBindTexture(GL_TEXTURE_2D, texture1);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, texture2);
+
 		// activate the shader
 		// ------
 		ourShader.use();
 
-		// update uniform color
-		// ------
-		float timeValue = glfwGetTime();
-		float colorValue = (sin(timeValue) / 2) + 0.5; // [0,1]
-		ourShader.setVec4("timeColor", 0.0f, 1 - colorValue, colorValue, 1.0f);
-
 		// render the triangle
 		// ------
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		//glDrawArrays(GL_TRIANGLES, 0, 3);
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)

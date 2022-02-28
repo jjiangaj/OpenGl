@@ -1,7 +1,10 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include <shader/Shader.h>
+#include <shader/shader.h>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <../stb_image.h>
 
 #include <iostream>
 
@@ -51,7 +54,13 @@ int main()
 		// position         // color
 		 0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,   // lower right
 		-0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   // lower left
-		 0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f    // top
+		 0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f    // top center
+	};
+
+	float texCoords[] = {
+	0.0f, 0.0f,  // lower-left corner  
+	1.0f, 0.0f,  // lower-right corner
+	0.5f, 1.0f   // top-center corner
 	};
 
 	// VBO, EBO, VAO
