@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{c8b14695-ca70-4992-8a9e-9fd9adcc9bdf}</ProjectGuid>
-    <RootNamespace>colors</RootNamespace>
+    <ProjectGuid>{4530356c-d9aa-439e-a6d2-adee0cb77102}</ProjectGuid>
+    <RootNamespace>basic_lighting</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

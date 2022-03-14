@@ -68,7 +68,7 @@ int main()
 	// configure global opengl state
 	// -----------------------------
 	glEnable(GL_DEPTH_TEST);
-	
+
 	// build and compile our shader zprogram
 	// ------------------------------------
 	Shader defaultShader("vshader.vs", "fshader.fs");
@@ -129,7 +129,7 @@ int main()
 	glBindVertexArray(VAO);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GL_FLOAT), (void*)0);
 	glEnableVertexAttribArray(0);
-	
+
 	unsigned int lightVAO;
 	glGenVertexArrays(1, &lightVAO);
 	glBindVertexArray(lightVAO);
