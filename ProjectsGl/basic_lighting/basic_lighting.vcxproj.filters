@@ -32,6 +32,9 @@
     <None Include="fshaderLight.fs">
       <Filter>源文件</Filter>
     </None>
+    <None Include="vshaderLight.vs">
+      <Filter>源文件</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\stb_image.h">

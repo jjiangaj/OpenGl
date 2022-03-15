@@ -152,6 +152,7 @@
     <None Include="fshader.fs" />
     <None Include="fshaderLight.fs" />
     <None Include="vshader.vs" />
+    <None Include="vshaderLight.vs" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\stb_image.h" />
